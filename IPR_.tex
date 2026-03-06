@@ -1,26 +1,100 @@
 \documentclass[11pt, letterpaper]{article}
 \usepackage[letterpaper,margin=1in]{geometry}
+
+% --- Font & Typography ---
+\usepackage[T1]{fontenc} % Use modern font encodings
+\usepackage{lmodern}     % Use the Latin Modern font, for a crisp look
 \usepackage{amsmath}
 \usepackage{amssymb}
+\usepackage{amsfonts}
+
+% --- Color & Graphics ---
+\usepackage{graphicx}
+\usepackage{cleveref}
+\usepackage{float}
+\usepackage{listings}
+\lstset{
+  language=Python,
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{blue},
+  stringstyle=\color{orange},
+  commentstyle=\color{gray},
+  showstringspaces=false,
+  frame=single,
+  columns=flexible
+}
+
+% --- Headers & Footers ---
+\usepackage{fancyhdr}    % For custom headers and footers
+
+% --- Tables & Boxes ---
+\usepackage{tabularx}    % For tables with columns that automatically adjust width
+\usepackage[most]{tcolorbox} % For creating styled boxes
+
+% --- Section Styling ---
+\usepackage{titlesec}    % To customize section titles
+
+% --- Miscellaneous ---
+\usepackage{mathtools}
 \usepackage{bigints}
-\linespread{1.25}
+
+\linespread{1.25}  % 1.5 line spacing
 
 \newcommand{\X}{\mathcal{X}}
 \newcommand{\Y}{\mathcal{Y}}
+\newcommand{\N}{\mathbb{N}}
 \renewcommand{\d}{\textrm{d}}
 
+% -------------------------------------------------------------------------
+% CUSTOMIZATION & SETUP
+% -------------------------------------------------------------------------
+
+% --- Define a theme color ---
+% Choose your own! E.g., MidnightBlue, RoyalBlue, SteelBlue, OliveGreen
+\definecolor{ThemeColor}{RGB}{45, 85, 155} % A nice, professional blue
+
+% --- Header Box Style ---
+% This custom box creates a clean, framed header for the report.
+\newtcolorbox{reportheader}{
+    colback=white,         % Background color of the box
+    colframe=ThemeColor,   % Color of the frame
+    arc=0mm,               % No rounded corners
+    boxrule=1pt,           % Thickness of the frame
+    sharp corners,         % Use sharp corners
+    left=5mm, right=5mm,   % Internal padding (left/right)
+    top=3mm, bottom=3mm,   % Internal padding (top/bottom)
+}
+
+% --- Section Title Formatting ---
+% This makes the section titles look clean and modern.
+\titleformat{\section}
+  {\normalfont\Large\bfseries\color{ThemeColor}} % format
+  {\thesection}                                  % label
+  {1em}                                          % sep
+  {}                                             % before-code
+  [\color{ThemeColor}\titlerule]                 % after-code
+
+\titleformat{\subsection}
+  {\normalfont\large\bfseries\color{ThemeColor}}
+  {\thesubsection}
+  {1em}
+  {}
+
+
 \begin{document}
-An Automated Market Maker (AMM) is a protocol which permits the execution of buy and sell orders on a blockchain.
+Decentralized Exchanges (DEX) have emerged recently with Uniswap as the leading automated market maker (AMM) by volume. 
+An automated market maker (AMM) is a protocol which permits the execution of buy and sell orders on a blockchain. 
+These protocols play a similar role as limit order books in traditional finance; users deposit their tokens into a liquidity pool, where they can be used by other actors for trading activities, enabling decentralized exchanges. 
+A liquidity provider (LP) is an actor who transfers tokens into liquidity pools and is rewarded by the fees paid by traders who use that pool to swap tokens. 
+%As swaps occur, the price moves between unitary price ranges, entering and exiting liquidity pools
 
-Uniswap v3 is a constant product market maker, meaning that it maintains invariant function $\mathcal{I}(x,y)=x\cdot y =L^2$ where $L$ denotes the liquidity $x$ and $y$ are virtual reserves of tokens $\X$ and $\Y$, respectively. A virtual reserve for token $\X$ is defined as $x=x_{\rm offset} + x_r$ where $x_r$ is the real reserves, and $x_{\rm offset}$ are some other quantities.
-A liquidity provider (LP) is an actor who transfers tokens into liquidity pools and are rewarded by the fees paid by traders who use that pool to swap tokens. 
-In Uniswap v3, LPs wishing to provide liquidity must specify a price range over which their tokens will be used for trading activities.
-Here, a price range defined as $R:=[p_l,p_u)$ where $p_l=\frac{x_l}{y_l}$ and $p_u=\frac{x_u}{y_u}$ must be specified in ticks $\tau$. Specifically, price $p(\tau)=\Big(\beta^{(p)}\Big)^\tau$ where $\beta^{(p)}=1.0001$ and $\tau$ is a multiple of $\delta_\pi$ (a value determined by swap fees $\phi=0.05\%,0.3\%,1\%$). 
-The authors define a unitary price range as the range spanned by two consecutive ticks $[p_l, p_u)$ such that $p_l(\delta_\pi\cdot i)$ and $p_u(\delta_\pi\cdot (i+1))$.
+Uniswap v3 is a constant product market maker, meaning that it maintains invariant function $\mathcal{I}(x,y)=x\cdot y =L^2$ where $L$ denotes the liquidity and $x$ and $y$ are virtual reserves of tokens $\X$ and $\Y$, respectively. A virtual reserve for a token $\X$ is defined as $x=x_{\rm offset} + x_r$ where $x_r$ is the real reserves, and $x_{\rm offset}$ are some other quantities.
+Liquidity providers wishing to provide liquidity must specify a price range over which their tokens will be used for trading activities (as long as the current price resides in that range).
+A square-root price range $R:=[\pi_l,\pi_u)$ where $\pi_l=\sqrt{p_l}=\sqrt{\frac{x_l}{y_l}}$ and $\pi_u=\sqrt{p_u}=\sqrt{\frac{x_u}{y_u}}$ must be specified in ticks $\tau$. The constant-product rule applies here $x_u\cdot y_u = x_l\cdot y_l = L^2$, which corresponds to a point on the price space (see \cref{fig:virutal_num})
+Specifically, price $p(\tau)=\Big(\beta^{(p)}\Big)^\tau$ where $\beta^{(p)}=1.0001$ and $\tau$ is a multiple of $\delta_\pi\in\N$. A \textit{unitary} price range is the range spanned by two consecutive ticks $p_l(\delta_\pi\cdot i)$ and $p_u(\delta_\pi\cdot (i+1))$. 
 
-Consider a square-root price range $[\pi_l,\pi_u):\pi_l=\sqrt{p_l},\, \pi_u=\sqrt{p_u}$ that is in the form $R_1\cup\ldots\cup R_n: n\geq 1$.
-For $i\leq n,\, R_i=[\pi_{l_i},\pi_{u_i})$ contains an amount $L_i$ of liquidity, and for $i<n,\,\pi_{u_i}=\pi_{l_{i+1}}$ i.e. the ranges are consecutive.
-An LP who deposited (resp. withdrew) the same amount of liquidity $\Delta L$ on range $R_i$, where $L_i+\Delta L\geq 0\forall i$, will deposit (resp. withdraw) the following amount of tokens into the pool:
+Consider a square-root unitary price $R=[\pi_l,\pi_u)=R_1\cup\ldots\cup R_n$, where $R_i=[\pi_{l_i},\pi_{u_i})$ already contains liquidity $L_i$ for $i=1,\ldots,n$.
+Suppose an LP deposits (resp. withdraws) the same amount of liquidity $\Delta L$ on range $R_i$, such that $L_i+\Delta L\geq 0\,\forall i\in\{1,\ldots,n\}$, then he will deposit (resp. withdraw) the following amount of tokens into the pool:
 \begin{equation}
 \label{eq:liq}
 \Delta x_r = \Delta L \cdot (\frac{1}{\pi_0^R}-\frac{1}{\pi_u})\quad \textrm{and}\quad \Delta y_r = \Delta L\cdot (\pi_0^R-\pi_l)
@@ -31,16 +105,17 @@ An LP who deposited (resp. withdrew) the same amount of liquidity $\Delta L$ on 
     \pi   & \text{otherwise}
 \end{cases}
 \end{equation}
-In this case, the liquidity provider is said to have deposited an amount of liquidity $\Delta L$ onto price range $R$.
-
-If an LP wishes to withdraw (burn) liquidity $\Delta L$ on price range $R$, then he would retrieve $\Delta x_r$ and $\Delta y_r$ real reserve tokens as specified in \eqref{eq:liq}, and in addition earn $\Delta x_{\rm fee}=\Delta L \cdot (\Phi_R^\X(t)-\Phi_R^\X(t_0))$ and $\Delta y_{\rm fee}=\Delta L \cdot (\Phi_R^\Y(t)-\Phi_R^\Y(t_0))$
-Here, accumulators $\Phi_R^\X$ and $\Phi_R^\Y$ are updated at every transaction. Suppose $a_i$ tokens $\X$ are transfered into the pool in exchanged for tokens $\Y$ via a swap operation, then $\Phi_R^\X\leftarrow\Phi_R^\X + \frac{a_i}{1-\phi}\cdot\frac{\phi}{L}$, where $L$ is the available liquidity on range $R$.
+If an LP wishes to withdraw (burn) liquidity $\Delta L$ on price range $R$, then he would retrieve $\Delta x_r$ and $\Delta y_r$ real reserve tokens as specified above in \eqref{eq:liq}, and in addition, earn $\Delta x_{\rm fee}=\Delta L \cdot (\Phi_R^\X(t)-\Phi_R^\X(t_0))$ and $\Delta y_{\rm fee}=\Delta L \cdot (\Phi_R^\Y(t)-\Phi_R^\Y(t_0))$, where accumulators $\Phi_R^\X$ and $\Phi_R^\Y$ are updated every time a trader swaps tokens while the square-root price is in range $R$.
+Suppose $a_i$ tokens $\X$ are transfered into the pool in exchange for tokens $\Y$ via a swap operation, then $\Phi_R^\X\leftarrow\Phi_R^\X + \frac{a_i}{1-\phi}\cdot\frac{\phi}{L}$, where $L$ is the available liquidity on range $R$.
 $\frac{a_i}{1-\phi}$ represents the input tokens actually used in the swap, which implies that $\frac{a_i\phi}{1-\phi}$ represents the accumulated fees from that operation and that $\frac{a_i}{1-\phi}\cdot\frac{\phi}{L}$ represents the amount of accumulated fees per unit of liquidity on the range $R$.
 
-\subsection*{LP Strategy}
-However, if a liquidity provider withdraws their tokens at a time where the pool price is significantly different from the one at deposit time, the value of their tokens net of fees will be lower than the value of their original tokens if they had not been deposited into the pool. This loss is only materialized when LPs withdraw their tokens from the pool, which is called \textit{Impermanent Loss} (IL) \cite{doi:10.1137/23M1606149}. 
+\subsection*{Impermanent Loss}
+A liquidity provider may provide liquidity and simultaneously hold tokens outside of the pool.
+If they withdraws their tokens at a time where the pool price is significantly different from the one at deposit time, the value of their tokens net of fees will be lower than the value of their original tokens if they had not been deposited into the pool. This loss is only materialized when LPs withdraw their tokens from the pool, which is called \textit{Impermanent Loss} (IL) \cite{doi:10.1137/23M1606149}. 
 
-Consider two strategies: (i) a liquidity providing stategy where tokens are deposited into a pool, and (ii) a strategy where tokens are withheld from the pool under $\bf{H}_0:$ Tokens $\X$ and $\Y$ outside the pool can be valued using pool price.. The value of strategies (i) and (ii) in reference num\'eraire token $\Y$ is denoted $V_P$ and $V_H$, respectively.Suppose that an amount of liquidity $\Delta L$, corresponding to token quantities $\Delta x_r$ and $\Delta y_r$ via equation \eqref{eq:liq}, is added to \textit{unitary} square-root price range $R:=[\pi_l,\pi_u)$ at time $t_0$. Let $p_i=\pi_i^2$ denote the price at time $t_i$, then at later time $t_1$,
+Consider two strategies: (i) a liquidity providing stategy where tokens are deposited into a pool, and (ii) a strategy where tokens are withheld from the pool under. Assume $\bf{H}_0:$ Tokens $\X$ and $\Y$ outside the pool can be valued using pool price.
+ %which in practice may not be the case due to discrepancies in (centralized exchange) CEX listings). 
+ The value of strategies (i) and (ii) in reference num\'eraire token $\Y$ is denoted $V_P$ and $V_H$, respectively.Suppose that an amount of liquidity $\Delta L$, corresponding to token quantities $\Delta x_r$ and $\Delta y_r$ through equation \eqref{eq:liq}, is added to unitary square-root price range $R:=[\pi_l,\pi_u)$ at time $t_0$. Let $p_i=\pi_i^2$ denote the price at time $t_i$, then at a later time $t_1$,
 \begin{equation}
 V_P(t_1)=\Delta L\cdot \Bigl(\Bigl(\frac{1}{\pi_1^R}-\frac{1}{\pi_u}\Bigr)\cdot\pi_1^2+\bigl(\pi_1^R-\pi_l\bigr)\Bigr)
 \end{equation}
@@ -48,41 +123,85 @@ Now suppose that quantities $\Delta x_r$ and $\Delta y_r$ are held outside of th
 \begin{equation}
 V_H(t_1)=\Delta L\cdot \Bigl(\Bigl(\frac{1}{\pi_0^R}-\frac{1}{\pi_u}\Bigr)\cdot\pi_1^2+\bigl(\pi_0^R-\pi_l\bigr)\Bigr)
 \end{equation}
-
-These results above can be generalized to a full liquidity curve $(\Delta L_i)_i$ spread over unitary range $[\pi_{l_i},\pi_{u_i})$. 
-For a given square-root price $\pi$, $\Delta L_\pi = \Delta L_i$ for $\pi\in[\pi_{l_i},\pi_{u_i})$, then the function $\pi\mapsto\Delta L_\pi$ is piecewise constant and right-continuous with a left limit, allowing for integrability w.r.t $\pi$
-
-Consider a liquidity provider adding a liquidity curve $(\Delta_\pi)_\pi$ to the pool while keeping $x_0$ tokens $\X$ and $y_0$ tokens $\Y$ outside the pool (under $\bf{H}_0$). Assume the integrability condition 
+The impermanent loss (which would be realized if the LP were to burn his tokens) is given by 
 \begin{equation}
-\bigintsss_1^\infty \frac{\Delta L_\pi}{\pi^2}d\pi + \bigintsss_0^1 \Delta L_\pi d\pi < \infty
+V_P(t_1) - V_H(t_1)=-\Delta L\cdot \bigl(\pi_0^R-\pi_1^R\bigr)\cdot\Bigl(1-\frac{\pi_1^2}{\pi_0^R\cdot\pi_1^R}\Bigr)
+\end{equation}
+These results above can be generalized to a full liquidity curve. Let $\Delta L_\pi := \Delta L_i$ for $\pi\in[\pi_{l_i},\pi_{u_i})$, then the function $\pi\mapsto\Delta L_\pi$ denote a liquidity curve. Since this mapping is piecewise constant and right-continuous with a left limit it allows for integrability w.r.t $\pi$. 
+
+Consider a liquidity provider adding a liquidity curve $(\Delta L_\pi)_\pi$ to the pool while keeping $x_0$ tokens $\X$ and $y_0$ tokens $\Y$ outside the pool (under $\bf{H}_0$). Assume the integrability condition 
+\begin{equation}
+\bigintsss_1^\infty \frac{\Delta L_\pi}{\pi^2}\,d\pi + \bigintsss_0^1 \Delta L_\pi\, d\pi < \infty
 \end{equation}
 At time $t_0$, when the price in the pool is $p_0$, their tokens admit the following $\Y$-value:
 \begin{equation}
-V_P(t_0)= x_0\cdot p_0 + y_0 + p_0\cdot\bigintsss_1^{+\infty} \frac{\Delta L_\pi}{\pi^2}d\pi + \bigintsss_0^{\pi_0} \Delta L_\pi d\pi < \infty
+V_P(t_0)= x_0\cdot p_0 + y_0 + p_0\cdot\bigintsss_1^{+\infty} \frac{\Delta L_\pi}{\pi^2}\,d\pi + \bigintsss_0^{\pi_0} \Delta L_\pi\, d\pi < \infty
 \end{equation}
 At time $t_1$, when the price in the pool is $p_1$, their tokens $\Y$-value net of swap fees is:
 \begin{equation}
 \label{eq:strat_payoff}
-V_P(t_1)= x_0\cdot p_1 + y_0 + p_1\cdot\bigintsss_1^{+\infty} \frac{\Delta L_\pi}{\pi^2}d\pi + \bigintsss_0^{\pi_0} \Delta L_\pi d\pi < \infty
+V_P(t_1)= x_0\cdot p_1 + y_0 + p_1\cdot\bigintsss_1^{+\infty} \frac{\Delta L_\pi}{\pi^2}\,d\pi + \bigintsss_0^{\pi_0} \Delta L_\pi\,d\pi < \infty
 \end{equation}
-So, an LP depositing a liquidity curve implies a payoff (net of fees) which is concave as a function of price (see equation \eqref{eq:strat_payoff}).
-From here the authors calculate the so-called ``Greeks'': (Delta) $\frac{\partial V_P(t_0)}{\partial p_0}$ and (Gamma) $\frac{\partial V_P(t_0^{\pm})}{\partial p_0}$ which gives the sensitivity of the strategy's global position $V_P(t_0)$ with respect to the $X-Y$ exchange rate. 
-Next, the authors make use of the Greeks and the Carr-Madan formula\cite{ctx60986673600002466} to show that any smooth concave payoff function can be generated by an LP strategy.
+This representation lets us calculate the so-called ``Greeks'': (Delta) $\frac{\partial V_P(t_0)}{\partial p_0}$ and (Gamma) $\frac{\partial V_P(t_0^{\pm})}{\partial p_0}$ which gives the sensitivity of the strategy's global position $V_P(t_0)$ with respect to the $X-Y$ exchange rate. 
+%Next, the authors use of the Greeks and the Carr-Madan formula\cite{ctx60986673600002466} to synthesize an option given a $C^3$ concave payoff function $h(x)$ and an arbitrary liquidity curve $(L_\pi)_\pi$. This is not explored in much detail but could serve for an options pricing model 
 
 \subsection*{Fees Modeling}
+Token swaps are assumed to occur because of arbitrageurs between the pool and another reference exchange (due to pricing discrepancies see fig.\cref{fig:cex}). 
 Let latent price process $(p_t)_t$ be defined on a filtered probability space $(\Omega, \mathcal{F}, (\mathcal{F})_{0\leq t\leq T},\mathbb{P})$.
-Let hypothesis $\bf{H}_p:$ the latent price process follows an It\^o dynamics of the form: $\d p_t / p_t= \mu_t\d t + \sigma_t\d W_t$ with progressively measurable drift $(\mu_t)_t$ and volatility $(\sigma_t)_t$: both $\mu$ and $\sigma$ are bounded.
+Let $\bf{H}_p:$ the latent price process follows an It\^o dynamics of the form: $\d p_t / p_t= \mu_t\d t + \sigma_t\d W_t$ with progressively measurable drift $(\mu_t)_t$ and volatility $(\sigma_t)_t$: both $\mu$ and $\sigma$ are bounded. 
+This hypothesis allows for the creation of a risk-neutral probability measure $\mathbb{P}^*$ via the Girsanov transform.
 
-Assuming that token swaps mainly occur because of arbitrageurs between the pool and another reference exchange, swap trades will occur when the latent price process $(p_t)_t$ changes by $\gamma\%$ where $\gamma=\phi$ is the swap fee paid out to liquidity providers.
-In other words, the swap times $(t_i)_i$ are described by $t_{i+1}=\inf\{t\ge t_i:p_t=p_{t_i}(1+\gamma)^{\pm 1}\}$.
+Hence, swap trades are assumed to occur at discrete swap times when $(p_t)_t$ changes by $\gamma\%$ where $\gamma\in\{0.01,0.03,0.05\}$ is the swap fee paid out to liquidity providers. The price process $p$ evolves at these discrete swap times and is assumed to coincide with the latent price process at these discrete times.
+%In other words, the swap times $(t_i)_i$ are described by $t_{i+1}=\inf\{t\ge t_i:p_t=p_{t_i}(1+\gamma)^{\pm 1}\}$.
 
-Then, the amount of fees in $\X$ and $\Y$ accumulated over the period $[0,T]$ is defined as:
+Consider an LP depositing a liquidity curve $(\Delta L_\pi)_\pi$ at time $t_0$. The amount of fees in $\X$ and $\Y$ accumulated over the period $[0,T]$ is given by:
 \begin{equation}
 \label{eq:fees}
-\text{Fees}^{\X}_{0\rightarrow T} = \sum_{R=[\pi_l,\pi_u)} \Delta L_\pi\cdot \bigl(\Phi_R^\X(T)-\Phi_R^\X(0)\bigr)
-\quad \text{and}\quad
-\text{Fees}^\Y_{0\rightarrow T} = \sum_{R=[\pi_l,\pi_u)} \Delta L_\pi\cdot \bigl(\Phi_R^\Y(T)-\Phi_R^\Y(0)\bigr)
+%\text{Fees}^{\X}_{0\rightarrow T} = \sum_{R=[\pi_l,\pi_u)} \Delta L_\pi\cdot \bigl(\Phi_R^\X(T)-\Phi_R^\X(0)\bigr)
+%\quad \text{and}\quad
+%\text{Fees}^\Y_{0\rightarrow T} = \sum_{R=[\pi_l,\pi_u)} \Delta L_\pi\cdot \bigl(\Phi_R^\Y(T)-\Phi_R^\Y(0)\bigr)
+\mathcal{F}((\Delta L_\pi)_\pi,(\sigma_t)_t)=\bigintsss_0^{+\infty} \Delta L_{\sqrt{b}}\frac{\mathbb{E}^*\Bigl[A^b_T(p)\Bigr]}{2\cdot b^{3/2}} \,\d b
 \end{equation}
+where $A_T^b$ is the local time of the price process $p$ at level $a$ i.e. how much time $p_t$ spends in price range $[b,b+\epsilon)$ over time range $[0,T]$. 
+Exact fee calculations for a simulated price process, show an increase of fees in both tokens coincide with high local times (see fig)
+ %with drift $\sigma=40\%$ and volatility $\mu=50\%$
+
+\subsection*{Conclusion \& Further Research}
+In this paper, M.Echenim et. al. sought to precisely define the way in which the Uniswap v3 protocol behaves to create an unambiguous knowledge-base for researchers and practitioners. 
+However, since a lot of the paper spent time developing theory from the protocol open-source code itself, it leaves several investigations with real data open, namely, comparing fees predicted by equation \eqref{eq:fees} with those actually observed in the pool or performing a qunatitative study of arbitrage opportunities between calls/puts and Uniswap v3 pools.
+One of the challenges of using their equation to estimate fees is the inverse problem of estimating the drift and diffusion parameters of the price It\^o price process $p_t$. 
+Nevertheless, a qualitative analysis of fees reveals patterns so-far left unaddressed.
+Using The Graph protocol, I was able to query live statistics from a one of the most liquid Uniswap v3 pools corresponding to WETH (token $\Y$) USDC (token $\X$) exchanges for the time period Jan. 28th 2026 to $T=$Mar. 5th 2026.
+A qualitative analysis of fees shows a higher concentration of liquidity above $p_T$, and lower fees per unit liquidity below $p_T$, which could be indicative of a bearish sentiment as most LPs are choosing price ranges above the current price to add liquidity. This variability in the distribution could be incorporated in the model to model risk before a liquidity provider decides to mint or burn tokens.
+
+\newpage
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.3\textwidth]{images/virtual_numbers.png} 
+    \caption{Representation of the virtual numbers $(x,y)$ and offset numbers $(x_{\rm offset}, y_{\rm offset})$ of tokens} 
+    \label{fig:virutal_num} 
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{images/cex_prices.png} 
+    \caption{Centralized Exchange (CEX) prices differ from one another with each color represents a differet exchange. The trade prices are for the BTC-USD exchange rate on March 12th 2023 (left) and BTC-EUR exchange rate on March 5th 2024 (right))} 
+    \label{fig:cex} 
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{images/liquidity_fees_dist.png} 
+    \caption{Liquidity distribution and distribution of fees per unit-liquidity $L$ for WETH (token $\Y$) USDC (token $\X$) for time period Jan. 28th, 2026 to Mar. 5th 2026. Price on Mar. 5th 2026 indicated by red-dashed line}
+    \label{fig:liq_fees} 
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\textwidth]{images/price_fees.png} 
+    \caption{Total liquidity pool fees accumulation from swap transactions between Jan. 28th, 2026 and Mar. 5th 2026}
+    \label{fig:liq_fees} 
+\end{figure}
 
 \newpage
 \bibliographystyle{plain}
